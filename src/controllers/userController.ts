@@ -1,0 +1,76 @@
+import { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { Pool } from 'pg';
+
+// Database connection (ideally should be in a separate module)
+const pool = new Pool({
+    user: 'admin',
+    host: 'localhost',
+    database: 'user_management_db',
+    password: 'admin123',
+    port: 5432,
+});
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
+class UserController {
+    // Register a new user
+    async register(req: Request, res: Response): Promise<void> {
+        const { username, email, password } = req.body;
+        try {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const result = await pool.query(
+                'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING *',
+                [username, email, hashedPassword]
+            );
+            const newUser = result.rows[0];
+            res.status(201).json({
+                userId: newUser.user_id,
+                username: newUser.username,
+                email: newUser.email,
+                created_at: newUser.created_at
+            });
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                res.status(500).json({ message: 'Error registering new user.', error: error.message });
+            } else {
+                res.status(500).json({message: 'Error registering new user.'});
+            }
+        }
+    }
+
+    // Authenticate user and return JWT
+    async login(req: Request, res: Response): Promise<void> {
+        const { email, password } = req.body;
+        try {
+            const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+            if (result.rows.length > 0) {
+                const user = result.rows[0];
+                const isMatch = await bcrypt.compare(password, user.password_hash);
+                if (isMatch) {
+                    const token = jwt.sign(
+                        { userId: user.user_id, email: user.email },
+                        JWT_SECRET,
+                        { expiresIn: '1h' }
+                    );
+                    res.json({ message: 'Login successful!', token });
+                } else {
+                    res.status(400).json({ message: 'Invalid credentials.' });
+                }
+            } else {
+                res.status(404).json({ message: 'User not found.' });
+            }
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                res.status(500).json({ message: 'Error logging in.', error: error.message });
+            } else {
+                res.status(500).json({ message: 'Error logging in.' });
+            }
+        }
+    }
+
+    // Additional methods like updateProfile, deleteUser etc. can be added here.
+}
+
+export default new UserController();
