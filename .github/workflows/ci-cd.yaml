@@ -24,12 +24,14 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: self-hosted
+    env:
+      KUBECONFIG: $HOME/.kube/config
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Kubeconfig
-        run: export KUBECONFIG=$HOME/.kube/config
+#      - name: Set up Kubeconfig
+#        run: export KUBECONFIG=$HOME/.kube/config
 #          echo "${{ secrets.KUBECONFIG }}" | base64 --decode > $HOME/.kube/config
 
       - name: Deploy to K3s
