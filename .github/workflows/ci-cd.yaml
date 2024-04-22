@@ -15,13 +15,11 @@ jobs:
       - name: Build Docker image
         run: docker build -t ghcr.io/mingleflix/usermanagement:${{ github.sha }} .
 
-#      - name: Log in to GitHub Container Registry
-#        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push Docker image
         run: docker push ghcr.io/mingleflix/usermanagement:${{ github.sha }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     needs: build-and-push
