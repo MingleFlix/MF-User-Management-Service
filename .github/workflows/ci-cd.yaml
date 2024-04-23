@@ -48,4 +48,7 @@ jobs:
           curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
       - name: Deploy to Kubernetes using Helm
         run: |
-          helm upgrade --install user-management ./helm/user-management --values ./helm/user-management/values.yaml
+          helm upgrade --install user-management ./helm/user-management \
+          --values ./helm/user-management/values.yaml
+          --set image.tag=${{ github.sha }}
+          --namespace default
