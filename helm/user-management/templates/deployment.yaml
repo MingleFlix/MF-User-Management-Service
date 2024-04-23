@@ -4,6 +4,7 @@ metadata:
   name: {{ include "user-management.fullname" . }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
       app: {{ include "user-management.fullname" . }}
