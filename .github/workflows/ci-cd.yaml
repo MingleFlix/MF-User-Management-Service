@@ -49,6 +49,6 @@ jobs:
       - name: Deploy to Kubernetes using Helm
         run: |
           helm upgrade --install user-management ./helm/user-management \
-          --values ./helm/user-management/values.yaml
-          --set image.tag=${{ github.sha }}
+          --values ./helm/user-management/values.yaml \
+          --set image.tag=${{ github.sha }} \
           --namespace default
