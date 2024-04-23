@@ -21,18 +21,31 @@ jobs:
       - name: Push Docker image
         run: docker push ghcr.io/mingleflix/usermanagement:${{ github.sha }}
 
+#  Using simple kubectl commands
+#  deploy:
+#    needs: build-and-push
+#    runs-on: self-hosted
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v2
+#
+#      - name: Replace image tag in Kubernetes deployment
+#        run: |
+#          export GITHUB_SHA=${GITHUB_SHA}
+#          envsubst < k8s/deployment.yaml.template > ./path/to/deployment.yaml
+#
+#      - name: Deploy to K3s
+#        run: export KUBECONFIG=~/.kube/config && kubectl apply -f k8s/
+
+# Using Helm
   deploy:
     needs: build-and-push
     runs-on: self-hosted
-    env:
-      KUBECONFIG: $HOME/.kube/config
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-#      - name: Set up Kubeconfig
-#        run: export KUBECONFIG=$HOME/.kube/config
-#          echo "${{ secrets.KUBECONFIG }}" | base64 --decode > $HOME/.kube/config
-
-      - name: Deploy to K3s
-        run: export KUBECONFIG=~/.kube/config && kubectl apply -f k8s/
+      - uses: actions/checkout@v2
+      - name: Install Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+      - name: Deploy to Kubernetes using Helm
+        run: |
+          helm upgrade --install user-management ./helm/user-management --values ./helm/user-management/values.yaml
