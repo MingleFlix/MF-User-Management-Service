@@ -11,3 +11,6 @@ service:
   targetPort: 3000
 
 containerPort: 3000
+
+imagePullSecrets:
+  - name: ghcr-io-secret
