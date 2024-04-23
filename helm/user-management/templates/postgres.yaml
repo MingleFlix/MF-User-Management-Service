@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "user-management.fullname" . }}-postgres
+spec:
+  serviceName: "{{ include "user-management.fullname" . }}-postgres"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "user-management.fullname" . }}-postgres
+  template:
+    metadata:
+      labels:
+        app: {{ include "user-management.fullname" . }}-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "{{ .Values.postgresql.credentials.database }}"
+            - name: POSTGRES_USER
+              value: "{{ .Values.postgresql.credentials.username }}"
+{{/*            - name: POSTGRES_PASSWORD*/}}
+{{/*              valueFrom:*/}}
+{{/*                secretKeyRef:*/}}
+{{/*                  name: {{ include "user-management.fullname" . }}-postgres-creds*/}}
+{{/*                  key: postgres-password*/}}
+            - name: POSTGRES_PASSWORD
+              value: "{{ .Values.postgresql.credentials.password }}"
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        accessModes: [ {{ .Values.postgresql.persistence.accessMode }} ]
+        storageClassName: "{{ .Values.postgresql.persistence.storageClass }}"
+        resources:
+          requests:
+            storage: "{{ .Values.postgresql.persistence.size }}"

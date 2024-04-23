@@ -14,3 +14,22 @@ containerPort: 3000
 
 imagePullSecrets:
   - name: ghcr-io-secret
+
+postgresql:
+  enabled: true
+  image:
+    repository: postgres
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5432
+  credentials:
+    database: user_management_db
+    username: admin
+    password: admin123
+  persistence:
+    enabled: true
+    storageClass: "-"
+    accessMode: ReadWriteOnce
+    size: 10Gi
