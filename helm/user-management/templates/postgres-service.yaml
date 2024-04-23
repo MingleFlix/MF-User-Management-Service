@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "user-management.fullname" . }}-postgres
+spec:
+  type: {{ .Values.postgresql.service.type }}
+  ports:
+    - port: {{ .Values.postgresql.service.port }}
+      targetPort: 5432
+  selector:
+    app: {{ include "user-management.fullname" . }}-postgres
