@@ -31,6 +31,6 @@ postgresql:
     password: admin123
   persistence:
     enabled: true
-#    storageClass: null
+    storageClass: nfs-client
     accessMode: ReadWriteOnce
     size: 10Gi
