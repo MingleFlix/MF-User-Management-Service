@@ -1,22 +1,12 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { Pool } from 'pg';
-
-// Database connection (ideally should be in a separate module)
-const pool = new Pool({
-    user: 'admin',
-    host: 'localhost',
-    database: 'user_management_db',
-    password: 'admin123',
-    port: 5432,
-});
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import pool from "../config/db";
 
 class UserController {
     // Register a new user
     async register(req: Request, res: Response): Promise<void> {
+        console.log('Registering new user', req.body)
         const { username, email, password } = req.body;
         try {
             const hashedPassword = await bcrypt.hash(password, 10);
@@ -51,7 +41,7 @@ class UserController {
                 if (isMatch) {
                     const token = jwt.sign(
                         { userId: user.user_id, email: user.email },
-                        JWT_SECRET,
+                        process.env.JWT_SECRET || 'secret',
                         { expiresIn: '1h' }
                     );
                     res.json({ message: 'Login successful!', token });

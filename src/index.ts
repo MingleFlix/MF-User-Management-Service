@@ -1,9 +1,17 @@
 import express from 'express';
+import bodyParser from 'body-parser';
+import dotenv from 'dotenv';
+
+import UserController from './controllers/userController';
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
+
+app.post('/register', UserController.register);
+app.post('/login', UserController.login);
 
 app.get('/', (req, res) => {
     res.send('Hello, world!');
