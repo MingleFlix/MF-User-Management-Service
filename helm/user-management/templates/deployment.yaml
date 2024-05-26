@@ -22,3 +22,6 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           ports:
             - containerPort: {{ .Values.containerPort }}
+          env:
+            - name: DB_HOST
+              value: {{ include "user-management.fullname" . }}-postgres
