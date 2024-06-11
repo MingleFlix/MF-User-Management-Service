@@ -1,4 +1,4 @@
-import express from 'express';
+import express, {Request, Response} from 'express';
 import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './swagger';
@@ -11,10 +11,11 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-app.use('/', router);
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-
+app.use('/', router);
+app.use('*', (req: Request, res: Response) => {
+    res.status(404).json({ message: 'Route not found' });
+});
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
