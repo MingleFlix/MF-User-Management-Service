@@ -1,6 +1,8 @@
 import swaggerJSDoc from 'swagger-jsdoc';
 
-// const dev = process.env.NODE_ENV !== 'production';
+// Determine the environment
+const dev = process.env.NODE_ENV !== 'production';
+const apiDocsPath = dev ? './src/routes/*.ts' : './dist/routes/*.js';
 
 const options: swaggerJSDoc.Options = {
     definition: {
@@ -12,7 +14,7 @@ const options: swaggerJSDoc.Options = {
         },
         // basePath: '/api/user-management/',
     },
-    apis: ['./src/routes/*.ts'], // Path to the API docs
+    apis: ['./src/routes/*.ts', './dist/routes/*.js'], // Path to the API docs
 };
 
 const swaggerSpec = swaggerJSDoc(options);
