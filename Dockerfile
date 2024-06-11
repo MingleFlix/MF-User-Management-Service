@@ -15,6 +15,9 @@ FROM node:21-slim
 
 WORKDIR /usr/src/app
 
+# Set NODE_ENV to production by default
+ENV NODE_ENV=production
+
 COPY package*.json ./
 
 # Install only production dependencies
