@@ -14,7 +14,7 @@ app.use(express.json());
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/', router);
 app.use('*', (req: Request, res: Response) => {
-    res.status(404).json({ message: 'Route not found' });
+    res.status(404).json({ message: 'user-management: Route not found' });
 });
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

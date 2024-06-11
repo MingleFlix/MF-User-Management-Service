@@ -1,5 +1,7 @@
 import swaggerJSDoc from 'swagger-jsdoc';
 
+// const dev = process.env.NODE_ENV !== 'production';
+
 const options: swaggerJSDoc.Options = {
     definition: {
         openapi: '3.0.0',
@@ -8,6 +10,7 @@ const options: swaggerJSDoc.Options = {
             version: '1.0.0',
             description: 'Handles user registration, authentication, and profile management',
         },
+        basePath: '/api/user-management/',
     },
     apis: ['./src/routes/*.ts'], // Path to the API docs
 };
