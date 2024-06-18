@@ -40,9 +40,9 @@ class UserController {
                 const isMatch = await bcrypt.compare(password, user.password_hash);
                 if (isMatch) {
                     const token = jwt.sign(
-                        { userId: user.user_id, email: user.email },
-                        process.env.JWT_SECRET || 'secret',
-                        { expiresIn: '1h' }
+                        { userId: user.user_id, email: user.email, username: user.username},
+                        process.env.JWT_SECRET || 'your-secret-key123123',
+                        { expiresIn: '12h' }
                     );
                     res.json({ message: 'Login successful!', token });
                 } else {
