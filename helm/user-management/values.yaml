@@ -16,6 +16,10 @@ containerPort: 3000
 imagePullSecrets:
   - name: ghcr-io-secret
 
+jwtSecret:
+  name: jwt-secret
+  key: JWT_SECRET
+
 postgresql:
   enabled: true
   image:

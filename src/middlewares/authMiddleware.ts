@@ -19,7 +19,8 @@ declare global {
 }
 
 const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    // get token from auth_token cookie
+    const token = req.cookies.auth_token;
     if (!token) return res.status(401).json({ message: 'Access denied. No token provided.' });
 
     try {
