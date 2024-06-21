@@ -39,9 +39,13 @@ class UserController {
                 const user = result.rows[0];
                 const isMatch = await bcrypt.compare(password, user.password_hash);
                 if (isMatch) {
+                    const secret = process.env.JWT_SECRET
+                    if (!secret) {
+                        throw new Error('JWT secret not found');
+                    }
                     const token = jwt.sign(
                         { userId: user.user_id, email: user.email, username: user.username},
-                        process.env.JWT_SECRET || 'your-secret-key123123',
+                        secret,
                         { expiresIn: '12h' }
                     );
                     res.json({ message: 'Login successful!', token });
