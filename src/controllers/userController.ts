@@ -46,7 +46,7 @@ class UserController {
                     const token = jwt.sign(
                         { userId: user.user_id, email: user.email, username: user.username},
                         secret,
-                        { expiresIn: '12h' }
+                        { expiresIn: '7d' }
                     );
                     res.json({ message: 'Login successful!', token });
                 } else {
