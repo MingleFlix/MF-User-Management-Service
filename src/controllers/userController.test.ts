@@ -13,7 +13,6 @@ jest.mock('jsonwebtoken', () => ({
     sign: jest.fn().mockReturnValue('mockToken'), // Explicitly mock `sign` method
 }));
 
-
 describe('UserController without DB', () => {
     describe('register', () => {
         it('registers a user successfully without hitting the DB', async () => {
@@ -85,6 +84,74 @@ describe('UserController without DB', () => {
                 message: 'Login successful!',
                 token: 'mockToken',
             }));
+        });
+    });
+
+    describe('get', () => {
+        it('should retrieve user details successfully', async () => {
+            const req = { user: { userId: 1 } } as Request;
+            const res = {
+                json: jest.fn().mockReturnThis(),
+                status: jest.fn().mockReturnThis(),
+            } as unknown as Response;
+
+            (pool.query as jest.Mock).mockResolvedValue({
+                rows: [{ user_id: 1, username: 'testUser', email: 'test@example.com', created_at: new Date() }],
+            });
+
+            await UserController.get(req, res);
+
+            console.log(res.status);
+            console.log(res.json);
+
+            expect(res.json).toHaveBeenCalledWith(expect.anything());
+            expect(res.status).toHaveBeenCalledWith(200);
+        });
+    });
+
+    describe('update', () => {
+        it('should update user details successfully', async () => {
+            const req = {
+                user: { userId: 1 },
+                body: {
+                    username: 'updatedUser',
+                    email: 'updated@example.com',
+                    password: 'newPassword123',
+                },
+            } as Request;
+            const res = {
+                json: jest.fn().mockReturnThis(),
+                status: jest.fn().mockReturnThis(),
+            } as unknown as Response;
+
+            (bcrypt.hash as jest.Mock).mockResolvedValue('hashedNewPassword');
+            (pool.query as jest.Mock).mockResolvedValue({
+                rows: [{ user_id: 1, username: 'updatedUser', email: 'updated@example.com', updated_at: new Date() }],
+            });
+
+            await UserController.update(req, res);
+
+            expect(res.json).toHaveBeenCalledWith(expect.anything());
+            expect(res.status).toHaveBeenCalledWith(200);
+        });
+    });
+
+    describe('delete', () => {
+        it('should delete a user successfully', async () => {
+            const req = { user: { userId: 1 } } as Request;
+            const res = {
+                json: jest.fn().mockReturnThis(),
+                status: jest.fn().mockReturnThis(),
+            } as unknown as Response;
+
+            (pool.query as jest.Mock).mockResolvedValue({
+                rows: [{ user_id: 1 }],
+            });
+
+            await UserController.delete(req, res);
+
+            expect(res.json).toHaveBeenCalledWith({ message: 'User deleted successfully.' });
+            expect(res.status).toHaveBeenCalledWith(200);
         });
     });
 });
