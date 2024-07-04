@@ -1,6 +1,5 @@
-import { Request, Response } from 'express';
+import {Request, Response} from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import pool from "../config/db";
 import {deleteUser, getUserDataById, registerUser, updateUser} from "../models/user";
 import {generateToken} from "../utils/authUtils";
@@ -9,7 +8,7 @@ class UserController {
     // Register a new user
     async register(req: Request, res: Response): Promise<void> {
         console.log('Registering new user', req.body)
-        const { username, email, password } = req.body;
+        const {username, email, password} = req.body;
         try {
             const newUser = await registerUser(username, email, password);
             res.status(201).json({
@@ -20,7 +19,7 @@ class UserController {
             });
         } catch (error: unknown) {
             if (error instanceof Error) {
-                res.status(500).json({ message: 'Error registering new user.', error: error.message });
+                res.status(500).json({message: 'Error registering new user.', error: error.message});
             } else {
                 res.status(500).json({message: 'Error registering new user.'});
             }
@@ -29,56 +28,58 @@ class UserController {
 
     // Authenticate user and return JWT
     async login(req: Request, res: Response): Promise<void> {
-        const { email, password } = req.body;
+        const {email, password} = req.body;
         try {
             const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
             if (result.rows.length > 0) {
                 const user = result.rows[0];
                 const isMatch = await bcrypt.compare(password, user.password_hash);
                 if (isMatch) {
-                    const token = generateToken({ userId: user.user_id, email: user.email, username: user.username });
-                    res.json({ message: 'Login successful!', token });
+                    const token = generateToken({userId: user.user_id, email: user.email, username: user.username});
+                    res.json({message: 'Login successful!', token});
                 } else {
-                    res.status(400).json({ message: 'Invalid credentials.' });
+                    res.status(400).json({message: 'Invalid credentials.'});
                 }
             } else {
-                res.status(404).json({ message: 'User not found.' });
+                res.status(404).json({message: 'User not found.'});
             }
         } catch (error: unknown) {
             if (error instanceof Error) {
-                res.status(500).json({ message: 'Error logging in.', error: error.message });
+                res.status(500).json({message: 'Error logging in.', error: error.message});
             } else {
-                res.status(500).json({ message: 'Error logging in.' });
+                res.status(500).json({message: 'Error logging in.'});
             }
         }
     }
 
+    // Delete user
     async delete(req: Request, res: Response): Promise<void> {
         console.log('Deleting user');
         const userId = req.user?.userId;
         if (!userId) {
-            res.status(401).json({ message: 'User ID is required.' });
+            res.status(401).json({message: 'User ID is required.'});
             return;
         }
         try {
             await deleteUser(userId);
-            res.status(200).json({ message: 'User deleted successfully.' });
+            res.status(200).json({message: 'User deleted successfully.'});
         } catch (error) {
             if (error instanceof Error) {
-                res.status(500).json({ message: 'Error deleting user.', error: error.message });
+                res.status(500).json({message: 'Error deleting user.', error: error.message});
             } else {
-                res.status(500).json({ message: 'Error deleting user.' });
+                res.status(500).json({message: 'Error deleting user.'});
             }
         }
     }
 
+    // Update user
     async update(req: Request, res: Response): Promise<void> {
         const userId = req.user?.userId;
         if (!userId) {
-            res.status(401).json({ message: 'User ID is required.' });
+            res.status(401).json({message: 'User ID is required.'});
             return;
         }
-        const { username, email, password } = req.body;
+        const {username, email, password} = req.body;
         try {
             const hashedPassword = await bcrypt.hash(password, 10);
             const updatedUser = await updateUser(userId, username, email, hashedPassword);
@@ -91,18 +92,19 @@ class UserController {
             return
         } catch (error: unknown) {
             if (error instanceof Error) {
-                res.status(500).json({ message: 'Error updating user.', error: error.message });
+                res.status(500).json({message: 'Error updating user.', error: error.message});
             } else {
-                res.status(500).json({ message: 'Error updating user.' });
+                res.status(500).json({message: 'Error updating user.'});
             }
         }
     }
 
+    // Get own user details
     async get(req: Request, res: Response): Promise<void> {
         const userId = req.user?.userId;
         try {
             if (!userId) {
-                res.status(401).json({ message: 'Access denied.' });
+                res.status(401).json({message: 'Access denied.'});
                 return
             }
             const user = await getUserDataById(userId);
@@ -116,15 +118,15 @@ class UserController {
                 });
                 return
             } else {
-                res.status(404).json({ message: 'User not found.' });
+                res.status(404).json({message: 'User not found.'});
                 return
             }
         } catch (error: unknown) {
             if (error instanceof Error) {
-                res.status(500).json({ message: 'Error getting user.', error: error.message });
+                res.status(500).json({message: 'Error getting user.', error: error.message});
                 return
             } else {
-                res.status(500).json({ message: 'Error getting user.' });
+                res.status(500).json({message: 'Error getting user.'});
                 return
             }
         }
