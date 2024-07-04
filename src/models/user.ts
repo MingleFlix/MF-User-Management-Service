@@ -13,6 +13,17 @@ async function getUserDataById(userId: number): Promise<User> {
     }
 }
 
+async function getUserDataByEmail(email: string): Promise<User> {
+    const query = 'SELECT * FROM users WHERE email = $1';
+    const values = [email];
+    try {
+        const result = await pool.query(query, values);
+        return result.rows[0]; // Assuming email is unique and returns a single user
+    } catch (error) {
+        throw error;
+    }
+}
+
 async function registerUser(username: string, email: string, password: string): Promise<any> {
     const client = await pool.connect();
     try {
@@ -77,6 +88,7 @@ async function updateUser(userId: number, username: string, email: string, passw
 
 export {
     getUserDataById,
+    getUserDataByEmail,
     registerUser,
     deleteUser,
     updateUser

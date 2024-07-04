@@ -1,7 +1,6 @@
 import {Request, Response} from 'express';
 import bcrypt from 'bcryptjs';
-import pool from "../config/db";
-import {deleteUser, getUserDataById, registerUser, updateUser} from "../models/user";
+import {deleteUser, getUserDataByEmail, getUserDataById, registerUser, updateUser} from "../models/user";
 import {generateToken} from "../utils/authUtils";
 
 class UserController {
@@ -30,18 +29,13 @@ class UserController {
     async login(req: Request, res: Response): Promise<void> {
         const {email, password} = req.body;
         try {
-            const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-            if (result.rows.length > 0) {
-                const user = result.rows[0];
-                const isMatch = await bcrypt.compare(password, user.password_hash);
-                if (isMatch) {
-                    const token = generateToken({userId: user.user_id, email: user.email, username: user.username});
-                    res.json({message: 'Login successful!', token});
-                } else {
-                    res.status(400).json({message: 'Invalid credentials.'});
-                }
+            const user = await getUserDataByEmail(email);
+            const isMatch = await bcrypt.compare(password, user.password_hash);
+            if (isMatch) {
+                const token = generateToken({userId: user.user_id, email: user.email, username: user.username});
+                res.json({message: 'Login successful!', token});
             } else {
-                res.status(404).json({message: 'User not found.'});
+                res.status(400).json({message: 'Invalid credentials.'});
             }
         } catch (error: unknown) {
             if (error instanceof Error) {

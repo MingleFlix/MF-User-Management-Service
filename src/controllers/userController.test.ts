@@ -1,86 +1,66 @@
-import { Request, Response } from 'express';
+import {Request, Response} from 'express';
 import UserController from './userController';
-import pool from "../config/db";
 import bcrypt from 'bcryptjs';
 import {describe} from "node:test";
-import jwt from "jsonwebtoken";
+import * as userModel from '../models/user';
 
-// Mocking external dependencies
-jest.mock('bcryptjs');
-jest.mock('../config/db');
-jest.mock('jsonwebtoken', () => ({
-    ...jest.requireActual('jsonwebtoken'), // This line ensures other methods of jsonwebtoken are still usable
-    sign: jest.fn().mockReturnValue('mockToken'), // Explicitly mock `sign` method
+// Mocking model functions
+jest.mock('../models/user', () => ({
+    registerUser: jest.fn(),
+    getUserDataById: jest.fn(),
+    getUserDataByEmail: jest.fn(),
+    deleteUser: jest.fn(),
+    updateUser: jest.fn(),
 }));
 
-describe('UserController without DB', () => {
+// Mocking authUtils
+jest.mock('../utils/authUtils', () => ({
+    generateToken: jest.fn().mockReturnValue('mockToken'),
+}));
+
+// Mocking bcrypt
+jest.mock('bcryptjs', () => ({
+    compare: jest.fn(),
+    hash: jest.fn(),
+}));
+
+describe('UserController', () => {
+    let mockReq: Request;
+    let mockRes: Response;
+
+    beforeEach(() => {
+        mockReq = {} as Request;
+        mockRes = {
+            json: jest.fn().mockReturnThis(),
+            status: jest.fn().mockReturnThis(),
+        } as unknown as Response;
+        jest.clearAllMocks();
+    });
+
     describe('register', () => {
-        it('registers a user successfully without hitting the DB', async () => {
-            // Mock request and response
-            const req = {
-                body: {
-                    username: 'testUser',
-                    email: 'test@example.com',
-                    password: 'password123',
-                },
-            } as Request;
+        it('should register a user successfully', async () => {
+            const mockUser = {user_id: 1, username: 'testUser', email: 'test@example.com', created_at: new Date()};
+            (userModel.registerUser as jest.Mock).mockResolvedValue(mockUser);
+            mockReq.body = {username: 'testUser', email: 'test@example.com', password: 'password123'};
 
-            const res = {
-                status: jest.fn().mockReturnThis(),
-                json: jest.fn().mockReturnThis(),
-            } as unknown as Response;
+            await UserController.register(mockReq, mockRes);
 
-            // Mocking bcrypt hash function
-            (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
-
-            // Mocking the database call
-            (pool.query as jest.Mock).mockResolvedValue({
-                rows: [{user_id: 1, username: 'testUser', email: 'test@example.com', created_at: new Date()}],
-            });
-
-            // Calling the register method
-            await UserController.register(req, res);
-
-            // Assertions
-            expect(res.status).toHaveBeenCalledWith(201);
-            expect(res.json).toHaveBeenCalledWith(expect.anything());
+            expect(userModel.registerUser).toHaveBeenCalledWith('testUser', 'test@example.com', 'password123');
+            expect(mockRes.status).toHaveBeenCalledWith(201);
+            expect(mockRes.json).toHaveBeenCalledWith(expect.anything());
         });
-    })
+    });
+
     describe('login', () => {
-        it('should authenticate user and return JWT without hitting the DB', async () => {
-            // Mock request and response
-            const req = {
-                body: {
-                    email: 'test@example.com',
-                    password: 'password123',
-                },
-            } as Request;
-
-            const res = {
-                status: jest.fn().mockReturnThis(),
-                json: jest.fn().mockReturnThis(),
-            } as unknown as Response;
-
-            // Mocking bcrypt.compare to simulate a password match
+        it('should authenticate user and return JWT', async () => {
+            mockReq.body = {email: 'test@example.com', password: 'password123'};
+            const mockUser = {user_id: 1, email: 'test@example.com', password_hash: 'hashedPassword'};
+            (userModel.getUserDataByEmail as jest.Mock).mockResolvedValue(mockUser);
             (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
-            // Mocking the database call to simulate finding the user
-            (pool.query as jest.Mock).mockResolvedValue({
-                rows: [{
-                    user_id: 1,
-                    email: 'test@example.com',
-                    password_hash: 'hashedPassword',
-                }],
-            });
+            await UserController.login(mockReq, mockRes);
 
-            // Mocking jwt.sign to return a token
-            (jwt.sign as jest.Mock).mockReturnValue('mockToken');
-
-            // Calling the login method
-            await UserController.login(req, res);
-
-            // Assertions
-            expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
                 message: 'Login successful!',
                 token: 'mockToken',
             }));
@@ -89,69 +69,63 @@ describe('UserController without DB', () => {
 
     describe('get', () => {
         it('should retrieve user details successfully', async () => {
-            const req = { user: { userId: 1 } } as Request;
-            const res = {
-                json: jest.fn().mockReturnThis(),
-                status: jest.fn().mockReturnThis(),
-            } as unknown as Response;
+            const mockUser = {user_id: 1, username: 'testUser', email: 'test@example.com', created_at: new Date()};
+            mockReq.user = {username: 'testUser', email: 'test@example.com', userId: 1};
+            (userModel.getUserDataById as jest.Mock).mockResolvedValue(mockUser);
 
-            (pool.query as jest.Mock).mockResolvedValue({
-                rows: [{ user_id: 1, username: 'testUser', email: 'test@example.com', created_at: new Date() }],
-            });
+            await UserController.get(mockReq, mockRes);
 
-            await UserController.get(req, res);
-
-            console.log(res.status);
-            console.log(res.json);
-
-            expect(res.json).toHaveBeenCalledWith(expect.anything());
-            expect(res.status).toHaveBeenCalledWith(200);
+            expect(userModel.getUserDataById).toHaveBeenCalledWith(1);
+            expect(mockRes.json).toHaveBeenCalledWith(expect.anything());
         });
     });
 
     describe('update', () => {
         it('should update user details successfully', async () => {
             const req = {
-                user: { userId: 1 },
+                user: {userId: 1},
                 body: {
                     username: 'updatedUser',
                     email: 'updated@example.com',
                     password: 'newPassword123',
                 },
-            } as Request;
+            } as unknown as Request;
             const res = {
                 json: jest.fn().mockReturnThis(),
                 status: jest.fn().mockReturnThis(),
             } as unknown as Response;
 
             (bcrypt.hash as jest.Mock).mockResolvedValue('hashedNewPassword');
-            (pool.query as jest.Mock).mockResolvedValue({
-                rows: [{ user_id: 1, username: 'updatedUser', email: 'updated@example.com', updated_at: new Date() }],
+            (userModel.updateUser as jest.Mock).mockResolvedValue({
+                user_id: 1,
+                username: 'updatedUser',
+                email: 'updated@example.com',
+                updated_at: new Date(),
             });
 
             await UserController.update(req, res);
 
-            expect(res.json).toHaveBeenCalledWith(expect.anything());
+            expect(userModel.updateUser).toHaveBeenCalledWith(1, 'updatedUser', 'updated@example.com', 'hashedNewPassword');
             expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith(expect.anything());
         });
     });
 
     describe('delete', () => {
         it('should delete a user successfully', async () => {
-            const req = { user: { userId: 1 } } as Request;
+            const req = {user: {userId: 1}} as unknown as Request;
             const res = {
                 json: jest.fn().mockReturnThis(),
                 status: jest.fn().mockReturnThis(),
             } as unknown as Response;
 
-            (pool.query as jest.Mock).mockResolvedValue({
-                rows: [{ user_id: 1 }],
-            });
+            (userModel.deleteUser as jest.Mock).mockResolvedValue({});
 
             await UserController.delete(req, res);
 
-            expect(res.json).toHaveBeenCalledWith({ message: 'User deleted successfully.' });
+            expect(userModel.deleteUser).toHaveBeenCalledWith(1);
             expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith({message: 'User deleted successfully.'});
         });
     });
 });

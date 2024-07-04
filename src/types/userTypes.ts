@@ -1,8 +1,8 @@
-// missing password_hash property because it is not needed in the User type
 type User = {
     user_id: number;
     username: string;
     email: string;
+    password_hash: string;
     created_at: Date;
     updated_at: Date;
 };
