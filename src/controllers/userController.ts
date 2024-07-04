@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from "../config/db";
+import {deleteUser, getUserDataById, registerUser, updateUser} from "../models/user";
+import {generateToken} from "../utils/authUtils";
 
 class UserController {
     // Register a new user
@@ -9,12 +11,7 @@ class UserController {
         console.log('Registering new user', req.body)
         const { username, email, password } = req.body;
         try {
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const result = await pool.query(
-                'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING *',
-                [username, email, hashedPassword]
-            );
-            const newUser = result.rows[0];
+            const newUser = await registerUser(username, email, password);
             res.status(201).json({
                 userId: newUser.user_id,
                 username: newUser.username,
@@ -39,15 +36,7 @@ class UserController {
                 const user = result.rows[0];
                 const isMatch = await bcrypt.compare(password, user.password_hash);
                 if (isMatch) {
-                    const secret = process.env.JWT_SECRET || '';
-                    if (!secret) {
-                        console.log('JWT secret not found');
-                    }
-                    const token = jwt.sign(
-                        { userId: user.user_id, email: user.email, username: user.username},
-                        secret,
-                        { expiresIn: '7d' }
-                    );
+                    const token = generateToken({ userId: user.user_id, email: user.email, username: user.username });
                     res.json({ message: 'Login successful!', token });
                 } else {
                     res.status(400).json({ message: 'Invalid credentials.' });
@@ -65,15 +54,16 @@ class UserController {
     }
 
     async delete(req: Request, res: Response): Promise<void> {
+        console.log('Deleting user');
         const userId = req.user?.userId;
+        if (!userId) {
+            res.status(401).json({ message: 'User ID is required.' });
+            return;
+        }
         try {
-            const result = await pool.query('DELETE FROM users WHERE user_id = $1 RETURNING *', [userId]);
-            if (result.rows.length > 0) {
-                res.status(200).json({ message: 'User deleted successfully.' });
-            } else {
-                res.status(404).json({ message: 'User not found.' });
-            }
-        } catch (error: unknown) {
+            await deleteUser(userId);
+            res.status(200).json({ message: 'User deleted successfully.' });
+        } catch (error) {
             if (error instanceof Error) {
                 res.status(500).json({ message: 'Error deleting user.', error: error.message });
             } else {
@@ -84,24 +74,21 @@ class UserController {
 
     async update(req: Request, res: Response): Promise<void> {
         const userId = req.user?.userId;
+        if (!userId) {
+            res.status(401).json({ message: 'User ID is required.' });
+            return;
+        }
         const { username, email, password } = req.body;
         try {
             const hashedPassword = await bcrypt.hash(password, 10);
-            const result = await pool.query(
-                'UPDATE users SET username = $1, email = $2, password_hash = $3 WHERE user_id = $4 RETURNING *',
-                [username, email, hashedPassword, userId]
-            );
-            if (result.rows.length > 0) {
-                const updatedUser = result.rows[0];
-                res.status(200).json({
-                    userId: updatedUser.user_id,
-                    username: updatedUser.username,
-                    email: updatedUser.email,
-                    updated_at: updatedUser.updated_at
-                });
-            } else {
-                res.status(404).json({ message: 'User not found.' });
-            }
+            const updatedUser = await updateUser(userId, username, email, hashedPassword);
+            res.status(200).json({
+                userId: updatedUser.user_id,
+                username: updatedUser.username,
+                email: updatedUser.email,
+                updated_at: updatedUser.updated_at
+            });
+            return
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ message: 'Error updating user.', error: error.message });
@@ -114,9 +101,12 @@ class UserController {
     async get(req: Request, res: Response): Promise<void> {
         const userId = req.user?.userId;
         try {
-            const result = await pool.query('SELECT * FROM users WHERE user_id = $1', [userId]);
-            if (result.rows.length > 0) {
-                const user = result.rows[0];
+            if (!userId) {
+                res.status(401).json({ message: 'Access denied.' });
+                return
+            }
+            const user = await getUserDataById(userId);
+            if (user) {
                 console.log('User found:', user);
                 res.status(200).json({
                     userId: user.user_id,
@@ -124,14 +114,18 @@ class UserController {
                     email: user.email,
                     created_at: user.created_at
                 });
+                return
             } else {
                 res.status(404).json({ message: 'User not found.' });
+                return
             }
         } catch (error: unknown) {
             if (error instanceof Error) {
                 res.status(500).json({ message: 'Error getting user.', error: error.message });
+                return
             } else {
                 res.status(500).json({ message: 'Error getting user.' });
+                return
             }
         }
     }
