@@ -39,7 +39,7 @@ class UserController {
                 const user = result.rows[0];
                 const isMatch = await bcrypt.compare(password, user.password_hash);
                 if (isMatch) {
-                    const secret = process.env.JWT_SECRET || 'mysecretkey';
+                    const secret = process.env.JWT_SECRET || '';
                     if (!secret) {
                         console.log('JWT secret not found');
                     }
@@ -64,7 +64,76 @@ class UserController {
         }
     }
 
-    // Additional methods like updateProfile, deleteUser etc. can be added here.
+    async delete(req: Request, res: Response): Promise<void> {
+        const userId = req.user?.userId;
+        try {
+            const result = await pool.query('DELETE FROM users WHERE user_id = $1 RETURNING *', [userId]);
+            if (result.rows.length > 0) {
+                res.json({ message: 'User deleted successfully.' });
+            } else {
+                res.status(404).json({ message: 'User not found.' });
+            }
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                res.status(500).json({ message: 'Error deleting user.', error: error.message });
+            } else {
+                res.status(500).json({ message: 'Error deleting user.' });
+            }
+        }
+    }
+
+    async update(req: Request, res: Response): Promise<void> {
+        const userId = req.user?.userId;
+        const { username, email, password } = req.body;
+        try {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const result = await pool.query(
+                'UPDATE users SET username = $1, email = $2, password_hash = $3 WHERE user_id = $4 RETURNING *',
+                [username, email, hashedPassword, userId]
+            );
+            if (result.rows.length > 0) {
+                const updatedUser = result.rows[0];
+                res.json({
+                    userId: updatedUser.user_id,
+                    username: updatedUser.username,
+                    email: updatedUser.email,
+                    updated_at: updatedUser.updated_at
+                });
+            } else {
+                res.status(404).json({ message: 'User not found.' });
+            }
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                res.status(500).json({ message: 'Error updating user.', error: error.message });
+            } else {
+                res.status(500).json({ message: 'Error updating user.' });
+            }
+        }
+    }
+
+    async get(req: Request, res: Response): Promise<void> {
+        const userId = req.user?.userId;
+        try {
+            const result = await pool.query('SELECT * FROM users WHERE user_id = $1', [userId]);
+            if (result.rows.length > 0) {
+                const user = result.rows[0];
+                res.json({
+                    userId: user.user_id,
+                    username: user.username,
+                    email: user.email,
+                    created_at: user.created_at
+                });
+            } else {
+                res.status(404).json({ message: 'User not found.' });
+            }
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                res.status(500).json({ message: 'Error getting user.', error: error.message });
+            } else {
+                res.status(500).json({ message: 'Error getting user.' });
+            }
+        }
+    }
 }
 
 export default new UserController();

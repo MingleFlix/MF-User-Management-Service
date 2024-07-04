@@ -59,12 +59,74 @@ router.post('/register', UserController.register);
  */
 router.post('/login', UserController.login);
 
-router.get('/', (req, res) => {
-    res.send('Hello, world!');
-});
+/**
+ * @swagger
+ * /user:
+ *   get:
+ *     summary: Get user details
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User details retrieved successfully
+ *       401:
+ *         description: Access denied
+ *   delete:
+ *     summary: Delete user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       401:
+ *         description: Access denied
+ *   patch:
+ *     summary: Update user details
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User details updated successfully
+ *       401:
+ *         description: Access denied
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Error updating user
+ */
+router.route('/user')
+    .get(UserController.get)
+    .patch(UserController.update)
+    .delete(UserController.delete)
 
-router.get('/test', (req, res) => {
-    res.send('This is a test route');
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     summary: Welcome message
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Welcome to the user-management service!
+ */
+router.get('/', (req, res) => {
+    res.send('Welcome to the user-management service!');
 });
 
 
