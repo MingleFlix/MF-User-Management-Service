@@ -1,34 +1,29 @@
-// src/middleware/authMiddleware.ts
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-interface JwtPayload {
-    userId: number;
-    role: string;
-}
+import {NextFunction, Request, Response} from 'express';
+import {authenticateJWT, JWTPayload} from "../utils/authUtils";
 
 declare global {
     namespace Express {
         interface Request {
-            user?: JwtPayload;
+            user: JWTPayload;
         }
     }
 }
 
 const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    // get token from auth_token cookie
-    const token = req.cookies.auth_token;
-    if (!token) return res.status(401).json({ message: 'Access denied. No token provided.' });
+    const token = req.cookies['auth_token'];
+
+    if (!token) {
+        return res.status(401).json({message: 'Access denied, no token provided'});
+    }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as JwtPayload;
-        req.user = decoded;
+        (req).user = authenticateJWT(token);
+        if (!req.user) {
+            throw new Error('Invalid token');
+        }
         next();
     } catch (error) {
-        res.status(400).json({ message: 'Invalid token' });
+        return res.status(401).json({message: 'Invalid token'});
     }
 };
 
