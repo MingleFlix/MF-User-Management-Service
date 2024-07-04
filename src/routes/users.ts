@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import UserController from "../controllers/userController";
+import authMiddleware from "../middlewares/authMiddleware";
 
 const router = Router();
+router.use('/user', authMiddleware);
 
 /**
  * @swagger
@@ -72,16 +74,6 @@ router.post('/login', UserController.login);
  *         description: User details retrieved successfully
  *       401:
  *         description: Access denied
- *   delete:
- *     summary: Delete user
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: User deleted successfully
- *       401:
- *         description: Access denied
  *   patch:
  *     summary: Update user details
  *     tags: [Users]
@@ -109,6 +101,16 @@ router.post('/login', UserController.login);
  *         description: User not found
  *       500:
  *         description: Error updating user
+ *   delete:
+ *     summary: Delete user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       401:
+ *         description: Access denied
  */
 router.route('/user')
     .get(UserController.get)
@@ -120,7 +122,7 @@ router.route('/user')
  * /:
  *   get:
  *     summary: Welcome message
- *     tags: [Users]
+ *     tags: [Welcome]
  *     responses:
  *       200:
  *         description: Welcome to the user-management service!
