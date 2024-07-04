@@ -69,7 +69,7 @@ class UserController {
         try {
             const result = await pool.query('DELETE FROM users WHERE user_id = $1 RETURNING *', [userId]);
             if (result.rows.length > 0) {
-                res.json({ message: 'User deleted successfully.' });
+                res.status(200).json({ message: 'User deleted successfully.' });
             } else {
                 res.status(404).json({ message: 'User not found.' });
             }
@@ -93,7 +93,7 @@ class UserController {
             );
             if (result.rows.length > 0) {
                 const updatedUser = result.rows[0];
-                res.json({
+                res.status(200).json({
                     userId: updatedUser.user_id,
                     username: updatedUser.username,
                     email: updatedUser.email,
@@ -117,7 +117,8 @@ class UserController {
             const result = await pool.query('SELECT * FROM users WHERE user_id = $1', [userId]);
             if (result.rows.length > 0) {
                 const user = result.rows[0];
-                res.json({
+                console.log('User found:', user);
+                res.status(200).json({
                     userId: user.user_id,
                     username: user.username,
                     email: user.email,
