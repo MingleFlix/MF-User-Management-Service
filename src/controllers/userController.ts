@@ -39,9 +39,9 @@ class UserController {
                 const user = result.rows[0];
                 const isMatch = await bcrypt.compare(password, user.password_hash);
                 if (isMatch) {
-                    const secret = process.env.JWT_SECRET
+                    const secret = process.env.JWT_SECRET || 'mysecretkey';
                     if (!secret) {
-                        throw new Error('JWT secret not found');
+                        console.log('JWT secret not found');
                     }
                     const token = jwt.sign(
                         { userId: user.user_id, email: user.email, username: user.username},
