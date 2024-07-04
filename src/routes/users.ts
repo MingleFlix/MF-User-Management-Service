@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import {Router} from 'express';
 import UserController from "../controllers/userController";
 import authMiddleware from "../middlewares/authMiddleware";
 
@@ -68,7 +68,7 @@ router.post('/login', UserController.login);
  *     summary: Get user details
  *     tags: [Users]
  *     security:
- *       - bearerAuth: []
+ *       - cookieAuth: []
  *     responses:
  *       200:
  *         description: User details retrieved successfully
@@ -78,7 +78,7 @@ router.post('/login', UserController.login);
  *     summary: Update user details
  *     tags: [Users]
  *     security:
- *       - bearerAuth: []
+ *       - cookieAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -105,7 +105,7 @@ router.post('/login', UserController.login);
  *     summary: Delete user
  *     tags: [Users]
  *     security:
- *       - bearerAuth: []
+ *       - cookieAuth: []
  *     responses:
  *       200:
  *         description: User deleted successfully
@@ -116,6 +116,31 @@ router.route('/user')
     .get(UserController.get)
     .patch(UserController.update)
     .delete(UserController.delete)
+
+/**
+ * @swagger
+ * /user/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: User details retrieved successfully
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Error retrieving user details
+ *     security:
+ *       - cookieAuth: []
+ */
+router.get('/user/:id', UserController.getById);
+
 
 /**
  * @swagger

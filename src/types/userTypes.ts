@@ -9,7 +9,7 @@ type User = {
 
 type Roles = {
     roleId: number;
-    role_name: string;
+    role_name: 'admin' | 'user';
 }
 
 type UserRoles = {

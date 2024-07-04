@@ -2,6 +2,7 @@ import {Request, Response} from 'express';
 import bcrypt from 'bcryptjs';
 import {deleteUser, getUserDataByEmail, getUserDataById, registerUser, updateUser} from "../models/user";
 import {generateToken} from "../utils/authUtils";
+import {getRolesForUser} from "../models/roles";
 
 class UserController {
     // Register a new user
@@ -101,6 +102,48 @@ class UserController {
                 res.status(401).json({message: 'Access denied.'});
                 return
             }
+            const user = await getUserDataById(userId);
+            if (user) {
+                console.log('User found:', user);
+                res.status(200).json({
+                    userId: user.user_id,
+                    username: user.username,
+                    email: user.email,
+                    created_at: user.created_at
+                });
+                return
+            } else {
+                res.status(404).json({message: 'User not found.'});
+                return
+            }
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                res.status(500).json({message: 'Error getting user.', error: error.message});
+                return
+            } else {
+                res.status(500).json({message: 'Error getting user.'});
+                return
+            }
+        }
+    }
+
+    // Get user details by ID
+    async getById(req: Request, res: Response): Promise<void> {
+        const userId = parseInt(req.params.id);
+
+        if (!userId) {
+            res.status(400).json({message: 'User ID is required.'});
+            return
+        }
+
+        const requestorId = req.user?.userId;
+        const roles = await getRolesForUser(requestorId);
+        if (!roles.includes('admin') && requestorId !== userId) {
+            res.status(401).json({message: 'Access denied.'});
+            return
+        }
+
+        try {
             const user = await getUserDataById(userId);
             if (user) {
                 console.log('User found:', user);
