@@ -15,7 +15,7 @@ app.use(express.json());
 // Use cookie-parser middleware
 app.use(cookieParser());
 
-app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/', router);
 app.use('*', (req: Request, res: Response) => {
     res.status(404).json({message: 'user-management: Route not found'});
