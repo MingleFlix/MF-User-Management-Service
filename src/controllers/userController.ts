@@ -10,12 +10,9 @@ class UserController {
         console.log('Registering new user', req.body)
         const {username, email, password} = req.body;
         try {
-            const newUser = await registerUser(username, email, password);
+            await registerUser(username, email, password);
             res.status(201).json({
-                userId: newUser.user_id,
-                username: newUser.username,
-                email: newUser.email,
-                created_at: newUser.created_at
+                message: 'User registered successfully',
             });
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -109,7 +106,7 @@ class UserController {
                     userId: user.user_id,
                     username: user.username,
                     email: user.email,
-                    created_at: user.created_at
+                    createdAt: user.created_at
                 });
                 return
             } else {
@@ -151,7 +148,9 @@ class UserController {
                     userId: user.user_id,
                     username: user.username,
                     email: user.email,
-                    created_at: user.created_at
+                    createdAt: user.created_at,
+                    updatedAt: user.updated_at,
+                    roles,
                 });
                 return
             } else {
