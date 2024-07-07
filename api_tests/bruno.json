@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "MF-user-management",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
