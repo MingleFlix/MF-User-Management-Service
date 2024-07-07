@@ -1,0 +1,44 @@
+meta {
+  name: register
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/register
+  body: json
+  auth: none
+}
+
+headers {
+  cookie: 
+}
+
+body:json {
+  {
+    "username": "jesse",
+    "email": "test@test.de",
+    "password": "12345"
+  }
+}
+
+body:multipart-form {
+  username: jesse
+  email: test@test.de
+  password: 12345
+}
+
+tests {
+  test("Status code is 201", function () {
+      expect(res.getStatus()).to.equal(201);
+  });
+  
+  test("Response time is less than 500ms", function () {
+      expect(res.getResponseTime()).to.be.below(500);
+  });
+  
+  test("Response has correct message", function () {
+      let data = res.getBody();
+      expect(data.message).to.equal("User registered successfully");
+  });
+}

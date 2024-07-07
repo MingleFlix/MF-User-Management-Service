@@ -1,0 +1,36 @@
+meta {
+  name: update
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{base_url}}/user
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "updateduser",
+    "email": "updateduser@example.com",
+    "password": "newpassword123"
+  }
+}
+
+tests {
+  test("Status code is 200", function () {
+      expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Response time is less than 500ms", function () {
+      expect(res.getResponseTime()).to.be.below(500);
+  });
+  
+  test("Response contains user details", function () {
+      let data = res.getBody();
+      expect(data).to.have.property("username");
+      expect(data).to.have.property("email");
+      expect(data).to.have.property("userId");
+  });
+}

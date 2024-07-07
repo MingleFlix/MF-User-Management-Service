@@ -1,0 +1,26 @@
+meta {
+  name: delete
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{base_url}}/user
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status code is 200", function () {
+      expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Response time is less than 500ms", function () {
+      expect(res.getResponseTime()).to.be.below(500);
+  });
+  
+  test("Response has correct message", function () {
+      let data = res.getBody();
+      expect(data.message).to.equal("User deleted successfully.");
+  });
+}

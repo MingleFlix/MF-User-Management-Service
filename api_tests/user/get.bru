@@ -1,0 +1,31 @@
+meta {
+  name: get
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/user
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status code is 200", function () {
+      expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Response time is less than 500ms", function () {
+      expect(res.getResponseTime()).to.be.below(500);
+  });
+  
+  test("Response contains user details", function () {
+      let data = res.getBody();
+      expect(data).to.have.property("username");
+      expect(data).to.have.property("email");
+      expect(data).to.have.property("userId");
+      expect(data).to.have.property("createdAt");
+    
+      bru.setEnvVar("user_id",data.userId);
+  });
+}
