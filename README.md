@@ -22,3 +22,51 @@ npm install -g typescript ts-node nodemon
 
 To view the API documentation visit [http://localhost:3000/api-docs](http://localhost:3000/api-docs) after starting the
 server.
+
+# Run tests
+
+To run the tests, run the following command:
+
+```
+npm run test
+```
+
+# Initialize the database
+
+user table:
+
+``` sql
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+roles table:
+
+``` sql
+CREATE TABLE roles (
+    role_id SERIAL PRIMARY KEY,
+    role_name VARCHAR(255) UNIQUE NOT NULL,
+    description TEXT
+);
+
+INSERT INTO roles (role_name, description) VALUES ('admin', 'System administrator with full access');
+INSERT INTO roles (role_name, description) VALUES ('user', 'Standard user with limited access');
+```
+
+user_roles table:
+
+``` sql
+CREATE TABLE user_roles (
+    user_id INT,
+    role_id INT,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles (role_id) ON DELETE CASCADE
+);
+```
