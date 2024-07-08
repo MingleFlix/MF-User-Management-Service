@@ -1,6 +1,6 @@
 # MF-User-Management-Service
 
-A brief description of the project.
+Handles user registration, authentication, and profile management.
 
 ## Table of Contents
 
@@ -90,3 +90,7 @@ To view the API documentation, visit http://localhost:3000/api-docs after starti
 
 Here you can see the components of the program and how they get initialized
 ![Component](https://github.com/MingleFlix/MF-User-Management-Service/assets/20597157/8d1b6aed-e5ac-46d6-95cc-1ded919b0670)
+
+### Technologies
+
+Node.js with Express, JWT (JSON Web Tokens) for authentication.
