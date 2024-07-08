@@ -88,7 +88,8 @@ To view the API documentation, visit http://localhost:3000/api-docs after starti
 
 ## Architecture Overview
 
-Here you can see the components of the program and how they get initialized
+Here you can see the components of the program and how they get initialized. MVC (Model-View-Controller) architecture is
+used.
 ![Component](https://github.com/MingleFlix/MF-User-Management-Service/assets/20597157/8d1b6aed-e5ac-46d6-95cc-1ded919b0670)
 
 ### Technologies
