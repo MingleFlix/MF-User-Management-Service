@@ -1,41 +1,39 @@
 # MF-User-Management-Service
 
-# Pre-requisites
+A brief description of the project.
 
-Node and npm should be installed on your machine. If not, please install it from [here](https://nodejs.org/en/download/)
+## Table of Contents
 
-To install typescript, ts-node and nodemon globally, run the following command:
+- [Pre-requisites](#pre-requisites)
+- [Installation](#installation)
+- [Database Initialization](#database-initialization)
+- [Running the Project](#running-the-project)
+- [Testing](#testing)
+- [API Documentation](#api-documentation)
+- [Architecture Overview](#architecture-overview)
 
-```
+## Pre-requisites
+
+Node and npm should be installed on your machine. If not, please install it
+from [here](https://nodejs.org/en/download/).
+
+To install typescript, ts-node, and nodemon globally, run the following command:
+
+```bash
 npm install -g typescript ts-node nodemon
 ```
 
-# Steps to run the project
+## Installation
 
-1. Clone the repository
-2. Run `npm install` to install all the dependencies
-3. Clone the .env.example file, rename it to .env and update the values as per your environment
-4. Run `npm run dev` to start the server in development mode
-5. To run the db run `docker-compose up postgres` in the root directory of the project
+1. Clone the repository.
+2. Run `npm install` to install all the dependencies.
+3. Clone the `.env.example` file, rename it to `.env`, and update the values as per your environment.
 
-# View the API documentation
-
-To view the API documentation visit [http://localhost:3000/api-docs](http://localhost:3000/api-docs) after starting the
-server.
-
-# Run tests
-
-To run the tests, run the following command:
-
-```
-npm run test
-```
-
-# Initialize the database
+## Database Initialization
 
 user table:
 
-``` sql
+```sql
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,
@@ -48,11 +46,11 @@ CREATE TABLE users (
 
 roles table:
 
-``` sql
+```sql
 CREATE TABLE roles (
-    role_id SERIAL PRIMARY KEY,
-    role_name VARCHAR(255) UNIQUE NOT NULL,
-    description TEXT
+role_id SERIAL PRIMARY KEY,
+role_name VARCHAR(255) UNIQUE NOT NULL,
+description TEXT
 );
 
 INSERT INTO roles (role_name, description) VALUES ('admin', 'System administrator with full access');
@@ -61,7 +59,7 @@ INSERT INTO roles (role_name, description) VALUES ('user', 'Standard user with l
 
 user_roles table:
 
-``` sql
+```sql
 CREATE TABLE user_roles (
     user_id INT,
     role_id INT,
@@ -71,7 +69,24 @@ CREATE TABLE user_roles (
 );
 ```
 
-# Architecture Overview
+## Running the Project
+
+1. Run npm run dev to start the server in development mode.
+2. To run the db, run docker-compose up postgres in the root directory of the project.
+
+## Testing
+
+To run the tests, run the following command:
+
+```bash
+npm test
+```
+
+## API Documentation
+
+To view the API documentation, visit http://localhost:3000/api-docs after starting the server.
+
+## Architecture Overview
+
 Here you can see the components of the program and how they get initialized
 ![Component](https://github.com/MingleFlix/MF-User-Management-Service/assets/20597157/8d1b6aed-e5ac-46d6-95cc-1ded919b0670)
-
