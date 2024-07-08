@@ -70,3 +70,8 @@ CREATE TABLE user_roles (
     FOREIGN KEY (role_id) REFERENCES roles (role_id) ON DELETE CASCADE
 );
 ```
+
+# Architecture Overview
+Here you can see the components of the program and how they get initialized
+![Component](https://github.com/MingleFlix/MF-User-Management-Service/assets/20597157/8d1b6aed-e5ac-46d6-95cc-1ded919b0670)
+
