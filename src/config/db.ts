@@ -1,5 +1,10 @@
+/*
+ * Author: Jesse Günzl
+ * Matrikelnummer: 2577166
+ */
+
 // src/config/db.ts
-import { Pool } from 'pg';
+import {Pool} from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();

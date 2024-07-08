@@ -1,3 +1,8 @@
+/*
+ * Author: Jesse Günzl
+ * Matrikelnummer: 2577166
+ */
+
 type User = {
     user_id: number;
     username: string;

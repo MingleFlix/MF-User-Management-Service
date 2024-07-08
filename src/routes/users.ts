@@ -2,6 +2,11 @@ import {Router} from 'express';
 import UserController from "../controllers/userController";
 import authMiddleware from "../middlewares/authMiddleware";
 
+/*
+ * Author: Jesse Günzl
+ * Matrikelnummer: 2577166
+ */
+
 const router = Router();
 router.use('/user', authMiddleware);
 

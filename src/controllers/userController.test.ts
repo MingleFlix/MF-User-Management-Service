@@ -4,6 +4,11 @@ import bcrypt from 'bcryptjs';
 import {describe} from "node:test";
 import * as userModel from '../models/user';
 
+/*
+ * Author: Jesse Günzl
+ * Matrikelnummer: 2577166
+ */
+
 // Mocking model functions
 jest.mock('../models/user', () => ({
     registerUser: jest.fn(),

@@ -1,6 +1,11 @@
 import swaggerJSDoc from 'swagger-jsdoc';
 import path from "node:path";
 
+/*
+ * Author: Jesse Günzl
+ * Matrikelnummer: 2577166
+ */
+
 // Determine the environment
 const dev = process.env.NODE_ENV !== 'production';
 const apiDocsPath = dev ? './src/routes/*.ts' : './dist/routes/*.js';
